@@ -1,36 +1,50 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import * as React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import React, {useState} from 'react'
+import { View, Alert,StyleSheet, FlatList } from 'react-native';
+import Header from './components/Header'
+import { uuid } from 'uuidv4'
+import Items from './components/Items'
+import AddItem from './components/AddItem'
+export const App = () => {
+  const [ items, setItems ] = useState( [
+    {id: uuid(), item: 'Bread'},
+    {id: uuid(), item: 'Milk'},
+    {id: uuid(), item: 'Juice'},
+    {id: uuid(), item: 'Choclate'},
+    {id: uuid(), item: 'Butter'},
+  ])
 
-import useCachedResources from './hooks/useCachedResources';
-import BottomTabNavigator from './navigation/BottomTabNavigator';
-import LinkingConfiguration from './navigation/LinkingConfiguration';
-
-const Stack = createStackNavigator();
-
-export default function App(props) {
-  const isLoadingComplete = useCachedResources();
-
-  if (!isLoadingComplete) {
-    return null;
-  } else {
-    return (
-      <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="dark-content" />}
-        <NavigationContainer linking={LinkingConfiguration}>
-          <Stack.Navigator>
-            <Stack.Screen name="Root" component={BottomTabNavigator} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </View>
-    );
+  const deleteItem = ( id ) => {
+    setItems( prevItems => {
+      return prevItems.filter(item=>item.id !== id)
+    })
   }
+
+  const addItem = ( item ) => {
+    if ( !item ) {
+      Alert.alert('Error', "Please enter an item", {text: 'ok'})
+    } else {
+      setItems( prevItems => {
+      return [{id: uuid(), item},...prevItems]
+    });
+    }
+    
+  }
+  return (
+    <View style={ styles.contianer}>
+      <Header title="Shopping List" />
+      <AddItem addItem={addItem}/>
+      <FlatList data={ items } renderItem={ ( { item } ) => <Items item={ item} deleteItem={deleteItem}  />}
+        />
+    </View>
+  )
 }
 
-const styles = StyleSheet.create({
-  container: {
+const styles = StyleSheet.create( {
+  contianer: {
     flex: 1,
-    backgroundColor: '#fff',
+    
   },
-});
+
+})
+
+export default App
